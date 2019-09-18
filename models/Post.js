@@ -15,7 +15,7 @@ Post.prototype.cleanUp = function() {
   this.data = {
     title: this.data.title.trim(),
     body: this.data.body.trim(),
-    createdDated: new Date(),
+    createdDate: new Date(),
     author: ObjectID(this.userid)
   }
 }
@@ -39,6 +39,21 @@ Post.prototype.create = function() {
       })
     } else {
       reject(this.errors)
+    }
+  })
+}
+
+Post.findSingleById = function(id) {
+  return new Promise(async function(resolve, reject) {
+    if (typeof(id) != "string" || !ObjectID.isValid(id)) {
+      reject()
+      return
+    }
+    let post = await postsCollection.findOne({_id: new ObjectID(id)})
+    if (post) {
+      resolve(post)
+    } else {
+      reject()
     }
   })
 }
