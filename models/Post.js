@@ -159,7 +159,7 @@ Post.search = function(searchTerm) {
         {$sort: {score: {$meta: "textScore"}}}
       ])
       resolve(posts)
-    } else {
+    } else { 
       reject()
     }
   })
