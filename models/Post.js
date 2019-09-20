@@ -5,9 +5,9 @@ const sanitizeHTML = require('sanitize-html')
 
 let Post = function(data, userid, requestedPostId) {
   this.data = data
-  this.userid = userid
   this.errors = []
-  this.requestedPostId = requestedPostId 
+  this.userid = userid
+  this.requestedPostId = requestedPostId
 }
 
 Post.prototype.cleanUp = function() {
@@ -33,7 +33,7 @@ Post.prototype.create = function() {
     this.cleanUp()
     this.validate()
     if (!this.errors.length) {
-      // save post into the da
+      // save post into database
       postsCollection.insertOne(this.data).then((info) => {
         resolve(info.ops[0]._id)
       }).catch(() => {
@@ -88,7 +88,7 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
         author: {$arrayElemAt: ["$authorDocument", 0]}
       }}
     ])
-    
+
     let posts = await postsCollection.aggregate(aggOperations).toArray()
 
     // clean up author property in each post object
@@ -116,7 +116,7 @@ Post.findSingleById = function(id, visitorId) {
     }
     
     let posts = await Post.reusablePostQuery([
-      {$match: {_id: ObjectID(id)}}
+      {$match: {_id: new ObjectID(id)}}
     ], visitorId)
 
     if (posts.length) {
@@ -130,7 +130,7 @@ Post.findSingleById = function(id, visitorId) {
 
 Post.findByAuthorId = function(authorId) {
   return Post.reusablePostQuery([
-    {$match: {author: authorId}}, 
+    {$match: {author: authorId}},
     {$sort: {createdDate: -1}}
   ])
 }
@@ -144,9 +144,9 @@ Post.delete = function(postIdToDelete, currentUserId) {
         resolve()
       } else {
         reject()
-      }
+      }    
     } catch {
-      reject()      
+      reject()
     }
   })
 }
@@ -162,6 +162,13 @@ Post.search = function(searchTerm) {
     } else { 
       reject()
     }
+  })
+}
+
+Post.countPostsByAuthor = function(id) {
+  return new Promise(async (resolve, reject) => {
+    let postCount = await postsCollection.countDocuments({author: id})
+    resolve(postCount)
   })
 }
 
