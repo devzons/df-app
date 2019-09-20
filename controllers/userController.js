@@ -74,9 +74,11 @@ exports.register = function(req, res) {
   })
 }
 
-exports.home = function(req, res) {
+exports.home = async function(req, res) {
   if (req.session.user) {
-    res.render('home-dashboard')
+    // fetch feed of posts for current user
+    let posts = await Post.getFeed(req.session.user._id)
+    res.render('home-dashboard', {posts: posts})
   } else {
     res.render('home-guest', {regErrors: req.flash('regErrors')})
   }
@@ -94,7 +96,6 @@ exports.ifUserExists = function(req, res, next) {
 exports.profilePostsScreen = function(req, res) {
   // ask our post model for posts by a certain author id
   Post.findByAuthorId(req.profileUser._id).then(function(posts) {
-    console.log(req.profileUser)
     res.render('profile', {
       currentPage: "posts",
       posts: posts,
